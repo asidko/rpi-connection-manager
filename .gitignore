@@ -1,0 +1,12 @@
+# Node.js
+**/node_modules/
+npm-debug.log
+
+# Python
+**/__pycache__/
+
+# Ignore IDE-specific files
+**/.idea/
+**/build/
+
+**/venv/

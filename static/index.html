@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WiFi Manager</title>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
+        #app { width: 90%; max-width: 600px; margin: auto; padding: 20px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        .actions { display: flex; flex-direction: column; gap: 10px; }
+        code { padding: 1em; background: #eee; display: block; white-space: pre-wrap; }
+        @media (min-width: 600px) { .actions { flex-direction: row; flex-wrap: wrap; justify-content: space-between; } }
+    </style>
+</head>
+<body>
+<div id="app">
+    <h1>RPI Connection Manager</h1>
+    <a href="/docs">API Docs</a>
+    <h2>Quick Actions</h2>
+    <div class="actions">
+        <button onclick="handleSwitch('wifi')" aria-label="Switch to WiFi">Switch to WiFi</button>
+        <button onclick="handleSwitch('hotspot')" aria-label="Switch to Hotspot">Switch to Hotspot</button>
+        <button onclick="handleGetIPAddresses()" aria-label="Get IP Addresses">Get IP</button>
+        <button onclick="handleGetWifiList()" aria-label="Get WiFi List">WiFi List</button>
+        <button onclick="handleConnectToWiFi()" aria-label="Connect to WiFi">Connect to WiFi</button>
+        <button onclick="handleRestartNetworkManager()" aria-label="Restart Network Manager">Restart Network</button>
+    </div>
+
+    <div id="responseArea">
+        <h3>Response</h3>
+        <code id="responseOutput"></code>
+    </div>
+</div>
+
+<script>
+    document.getElementById('responseArea').style.display = 'none';
+
+    const fetchData = async (url, options = {}) => {
+        try {
+            const res = await fetch(url, options);
+            const data = await res.json();
+            return data;
+        } catch (error) {
+            console.error("Network error:", error);
+            updateResponse("Network error occurred");
+        }
+    };
+
+    const updateResponse = (response) => {
+        const responseOutput = document.getElementById('responseOutput');
+        responseOutput.textContent = response;
+        document.getElementById('responseArea').style.display = 'block';
+    };
+
+    const handleSwitch = async (mode) => {
+        const data = await fetchData(`/switch_to_${mode}`);
+        updateResponse(data?.message || "No response");
+    };
+
+    const handleGetWifiList = async () => {
+        const data = await fetchData('/get_wifi_list');
+        updateResponse(data['wifi_list']?.join('\n') || "No response");
+    };
+
+    const handleRestartNetworkManager = async () => {
+        const data = await fetchData('/restart_network_manager');
+        updateResponse(data?.message || "No response");
+    };
+
+    const handleConnectToWiFi = async () => {
+        const ssid = prompt("Enter SSID:");
+        const password = prompt("Enter Password:");
+        const data = await fetchData(`/connect_to_wifi?ssid=${ssid}&password=${password}`);
+        updateResponse(data?.message || "No response");
+    };
+
+    const handleGetIPAddresses = async () => {
+        const data = await fetchData('/get_ip_addresses');
+        if (data) {
+            updateResponse(`Local IP: ${data.local_ip}, Public IP: ${data.public_ip}`);
+        }
+    };
+</script>
+</body>
+</html>

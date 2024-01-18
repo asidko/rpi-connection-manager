@@ -1,0 +1,11 @@
+[Unit]
+Description=RPI_Autoconnect
+After=network.target
+
+[Service]
+ExecStart=PROJECT_PATH/venv/bin/python3 PROJECT_PATH/main.py
+Restart=always
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
